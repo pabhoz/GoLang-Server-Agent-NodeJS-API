@@ -150,10 +150,10 @@ func getRunningProcesses() RunningProccessesInfo {
 
 // UserInfo structure
 type UserInfo struct {
-	Username    string
-	Application string
-	Date        string
-	Time        string
+	Username    string `json:"username"`
+	Application string `json:"application"`
+	Date        string `json:"date"`
+	Time        string `json:"time"`
 }
 
 func getCurrentUsersController(w http.ResponseWriter, r *http.Request) {
