@@ -6,10 +6,11 @@ export function getAll(req: Request, res: Response) {
     res.status(200).json(gods);
 };
 
-export function createLog(req: Request, res: Response) {
-    const agentName = req.body.agentName;
+export async function createLog(req: Request, res: Response) {
+    const agentUID = req.body.agentUID;
     const data = req.body.data;
-    const result = ProcessorsService.create(agentName, data);
+    const result = await ProcessorsService.create(agentUID, data);
+    
     const response: any = {
         error: false,
         msg: "Se ha creado un nuevo registro",

@@ -18,8 +18,14 @@ import (
 	"github.com/shirou/gopsutil/load"
 )
 
-var port string = os.Args[1]
-var api string = os.Args[2]
+// Max length 60 => saved to database as varchar
+var agentUID string = os.Args[1]
+
+// Ex: 8080
+var port string = os.Args[2]
+
+// Ex: http://localhost:3000
+var api string = os.Args[3]
 
 func dealwithErr(err error) {
 	if err != nil {
@@ -30,7 +36,7 @@ func dealwithErr(err error) {
 
 // ProcessorInfo Structure
 type ProcessorInfo struct {
-	CPUIndex              int64            `json:"index"`
+	CPUIndex              int64            `json:"cpuIndex"`
 	VendorID              string           `json:"vendorId"`
 	Family                string           `json:"family"`
 	NumberOfCores         int64            `json:"numberOfCores"`
@@ -52,17 +58,16 @@ func getProcessorDataController(w http.ResponseWriter, r *http.Request) {
 
 // PostBody Structure
 type PostBody struct {
+	AgetUID   string      `json:"agentUID"`
 	AgentName string      `json:"agentName"`
 	Data      interface{} `json:"data"`
 }
 
 func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
 	processorInfo := getProcessorData()
-	hostInfo := getHostInfo()
-	postBody := PostBody{
-		AgentName: hostInfo.Hostname,
-		Data:      processorInfo,
-	}
+
+	postBody := preparePostBody(processorInfo)
+
 	requestBody, err := json.Marshal(postBody)
 	dealwithErr(err)
 
@@ -70,6 +75,16 @@ func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(string(body))
 	// json.NewEncoder(w).Encode(processorInfo)
+}
+
+func preparePostBody(data interface{}) PostBody {
+	hostInfo := getHostInfo()
+	postBody := PostBody{
+		AgetUID:   agentUID,
+		AgentName: hostInfo.Hostname,
+		Data:      data,
+	}
+	return postBody
 }
 
 func postRequest(endpoint string, requestBody []byte) []byte {
@@ -232,10 +247,10 @@ func index(w http.ResponseWriter, r *http.Request) {
 	msg = msg + "* Información de SO: /so\n"
 	msg = msg + "\n"
 	msg = msg + "Envíos al API disponibles:\n"
-	msg = msg + "* Información de procesador: /send/processor\n"
-	msg = msg + "* Información de procesos: /send/runningProcesses\n"
-	msg = msg + "* Información de procesos: /send/users\n"
-	msg = msg + "* Información de SO: /send/so\n"
+	msg = msg + "* Información de procesador: /log/processor\n"
+	msg = msg + "* Información de procesos: /log/runningProcesses\n"
+	msg = msg + "* Información de procesos: /log/users\n"
+	msg = msg + "* Información de SO: /log/so\n"
 	w.Write([]byte(msg))
 }
 
@@ -248,11 +263,13 @@ func main() {
 	mux.HandleFunc("/users", getCurrentUsersController)
 	mux.HandleFunc("/so", getSODataController)
 
-	mux.HandleFunc("/send/processor", postProcessorDataController)
-	//mux.HandleFunc("/send/runningProcesses", postRunningProcessesController)
-	//mux.HandleFunc("/send/users", postCurrentUsersController)
-	//mux.HandleFunc("/send/so", postSODataController)
-
+	mux.HandleFunc("/log/processor", postProcessorDataController)
+	//mux.HandleFunc("/log/runningProcesses", postRunningProcessesController)
+	//mux.HandleFunc("/log/users", postCurrentUsersController)
+	//mux.HandleFunc("/log/so", postSODataController)
+	hostInfo := getHostInfo()
+	fmt.Println("Agent Hostname:" + hostInfo.Hostname)
+	fmt.Println("Agent UID:" + agentUID)
 	fmt.Println("Listening at: localhost:" + port + "; API: " + api)
 	http.ListenAndServe(":"+port, mux)
 

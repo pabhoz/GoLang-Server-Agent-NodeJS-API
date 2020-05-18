@@ -19,23 +19,19 @@ USE `servers` ;
 -- Table `servers`.`Agents`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `servers`.`Agents` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `uid` INT NOT NULL,
-  `name` VARCHAR(120) NOT NULL,
+  `uid` VARCHAR(60) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL,
-  PRIMARY KEY (`id`, `uid`))
+  PRIMARY KEY (`uid`))
 ENGINE = InnoDB;
-
-CREATE UNIQUE INDEX `name_UNIQUE` ON `servers`.`Agents` (`name` ASC);
 
 
 -- -----------------------------------------------------
 -- Table `servers`.`ProcessorLogs`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `servers`.`ProcessorLogs` (
-  `id` INT NOT NULL,
-  `agentId` INT NOT NULL,
-  `index` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `agentId` VARCHAR(60) NOT NULL,
+  `cpuIndex` INT NOT NULL,
   `vendorId` VARCHAR(45) NOT NULL,
   `family` VARCHAR(45) NOT NULL,
   `numberOfCores` INT NOT NULL,
@@ -44,14 +40,14 @@ CREATE TABLE IF NOT EXISTS `servers`.`ProcessorLogs` (
   `currentCPUUtilization` TEXT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_ProcessorsLogs_Agents`
+  CONSTRAINT `fk_ProcessorLogs_Agents1`
     FOREIGN KEY (`agentId`)
-    REFERENCES `servers`.`Agents` (`id`)
+    REFERENCES `servers`.`Agents` (`uid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE INDEX `fk_ProcessorsLogs_Agents_idx` ON `servers`.`ProcessorLogs` (`agentId` ASC);
+CREATE INDEX `fk_ProcessorLogs_Agents1_idx` ON `servers`.`ProcessorLogs` (`agentId` ASC);
 
 
 -- -----------------------------------------------------
@@ -59,13 +55,13 @@ CREATE INDEX `fk_ProcessorsLogs_Agents_idx` ON `servers`.`ProcessorLogs` (`agent
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `servers`.`UsersLogs` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `agentId` INT NOT NULL,
+  `agentId` VARCHAR(60) NOT NULL,
   `activeUsers` TEXT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_UsersLogs_Agents1`
     FOREIGN KEY (`agentId`)
-    REFERENCES `servers`.`Agents` (`id`)
+    REFERENCES `servers`.`Agents` (`uid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -78,7 +74,7 @@ CREATE INDEX `fk_UsersLogs_Agents1_idx` ON `servers`.`UsersLogs` (`agentId` ASC)
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `servers`.`RunningProcessesLog` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `agentId` INT NOT NULL,
+  `agentId` VARCHAR(60) NOT NULL,
   `total` VARCHAR(45) NOT NULL,
   `running` VARCHAR(45) NOT NULL,
   `processesList` TEXT NOT NULL,
@@ -86,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `servers`.`RunningProcessesLog` (
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_RunningProcessesLog_Agents1`
     FOREIGN KEY (`agentId`)
-    REFERENCES `servers`.`Agents` (`id`)
+    REFERENCES `servers`.`Agents` (`uid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -98,8 +94,8 @@ CREATE INDEX `fk_RunningProcessesLog_Agents1_idx` ON `servers`.`RunningProcesses
 -- Table `servers`.`SOLogs`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `servers`.`SOLogs` (
-  `id` INT NOT NULL,
-  `agentId` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `agentId` VARCHAR(60) NOT NULL,
   `runtime` VARCHAR(45) NOT NULL,
   `name` VARCHAR(45) NOT NULL,
   `platform` VARCHAR(45) NOT NULL,
@@ -107,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `servers`.`SOLogs` (
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_SOLogs_Agents1`
     FOREIGN KEY (`agentId`)
-    REFERENCES `servers`.`Agents` (`id`)
+    REFERENCES `servers`.`Agents` (`uid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
