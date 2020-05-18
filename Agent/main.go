@@ -50,12 +50,23 @@ func getProcessorDataController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(processorInfo)
 }
 
+// PostBody Structure
+type PostBody struct {
+	AgentName string      `json:"agentName"`
+	Data      interface{} `json:"data"`
+}
+
 func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
 	processorInfo := getProcessorData()
-	requestBody, err := json.Marshal(processorInfo)
+	hostInfo := getHostInfo()
+	postBody := PostBody{
+		AgentName: hostInfo.Hostname,
+		Data:      processorInfo,
+	}
+	requestBody, err := json.Marshal(postBody)
 	dealwithErr(err)
 
-	body := postRequest("/processor", requestBody)
+	body := postRequest("/processors", requestBody)
 
 	fmt.Println(string(body))
 	// json.NewEncoder(w).Encode(processorInfo)
@@ -202,11 +213,18 @@ func getSOData() OSInfo {
 	return osInfo
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
+func getHostInfo() *host.InfoStat {
 	hostStat, err := host.Info()
 	dealwithErr(err)
 
-	msg := "Agente de la máquina " + hostStat.Hostname + "\n\n"
+	return hostStat
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+
+	hostInfo := getHostInfo()
+
+	msg := "Agente de la máquina " + hostInfo.Hostname + "\n\n"
 	msg = msg + "Consultas disponibles:\n"
 	msg = msg + "* Información de procesador: /processor\n"
 	msg = msg + "* Información de procesos: /runningProcesses\n"
