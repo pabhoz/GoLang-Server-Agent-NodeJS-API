@@ -12,10 +12,10 @@ export default class Model {
     
     insert(query: string) {
         let result = new Promise((resolve, reject) => {
-            Model.dbc.query(query, function (err: any, result: any) {
-                if (err) reject(err);
-                resolve(result)
-              });
+            Model.dbc.query(query, (err: any, rows: any, fields: any) => {
+                if (err) { reject(err); }
+                resolve(rows);
+            });
         });
 
         return result;

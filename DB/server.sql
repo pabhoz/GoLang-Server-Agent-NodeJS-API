@@ -91,9 +91,9 @@ CREATE INDEX `fk_RunningProcessesLog_Agents1_idx` ON `servers`.`RunningProcesses
 
 
 -- -----------------------------------------------------
--- Table `servers`.`SOLogs`
+-- Table `servers`.`OSLogs`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `servers`.`SOLogs` (
+CREATE TABLE IF NOT EXISTS `servers`.`OSLogs` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `agentId` VARCHAR(60) NOT NULL,
   `runtime` VARCHAR(45) NOT NULL,
@@ -108,28 +108,7 @@ CREATE TABLE IF NOT EXISTS `servers`.`SOLogs` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE INDEX `fk_SOLogs_Agents1_idx` ON `servers`.`SOLogs` (`agentId` ASC);
-
-
--- -----------------------------------------------------
--- Table `servers`.`ActiveUsers`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `servers`.`ActiveUsers` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `ussersLogId` INT NOT NULL,
-  `username` VARCHAR(45) NOT NULL,
-  `application` VARCHAR(45) NOT NULL,
-  `date` VARCHAR(45) NOT NULL,
-  `time` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_ActiveUsers_UsersLogs1`
-    FOREIGN KEY (`ussersLogId`)
-    REFERENCES `servers`.`UsersLogs` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-CREATE INDEX `fk_ActiveUsers_UsersLogs1_idx` ON `servers`.`ActiveUsers` (`ussersLogId` ASC);
+CREATE INDEX `fk_SOLogs_Agents1_idx` ON `servers`.`OSLogs` (`agentId` ASC);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -34,47 +34,11 @@ func dealwithErr(err error) {
 	}
 }
 
-// ProcessorInfo Structure
-type ProcessorInfo struct {
-	CPUIndex              int64            `json:"cpuIndex"`
-	VendorID              string           `json:"vendorId"`
-	Family                string           `json:"family"`
-	NumberOfCores         int64            `json:"numberOfCores"`
-	ModelName             string           `json:"modelName"`
-	Speed                 string           `json:"speed"`
-	CurrentCPUUtilization []CPUUtilization `json:"currentCPUUtilization"`
-}
-
-// CPUUtilization structure
-type CPUUtilization struct {
-	Index       int    `json:"index"`
-	Utilization string `json:"utilization"`
-}
-
-func getProcessorDataController(w http.ResponseWriter, r *http.Request) {
-	processorInfo := getProcessorData()
-	json.NewEncoder(w).Encode(processorInfo)
-}
-
 // PostBody Structure
 type PostBody struct {
 	AgetUID   string      `json:"agentUID"`
 	AgentName string      `json:"agentName"`
 	Data      interface{} `json:"data"`
-}
-
-func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
-	processorInfo := getProcessorData()
-
-	postBody := preparePostBody(processorInfo)
-
-	requestBody, err := json.Marshal(postBody)
-	dealwithErr(err)
-
-	body := postRequest("/processors", requestBody)
-
-	fmt.Println(string(body))
-	// json.NewEncoder(w).Encode(processorInfo)
 }
 
 func preparePostBody(data interface{}) PostBody {
@@ -97,6 +61,41 @@ func postRequest(endpoint string, requestBody []byte) []byte {
 	dealwithErr(err)
 
 	return body
+}
+
+// ProcessorInfo Structure
+type ProcessorInfo struct {
+	CPUIndex              int64            `json:"cpuIndex"`
+	VendorID              string           `json:"vendorId"`
+	Family                string           `json:"family"`
+	NumberOfCores         int64            `json:"numberOfCores"`
+	ModelName             string           `json:"modelName"`
+	Speed                 string           `json:"speed"`
+	CurrentCPUUtilization []CPUUtilization `json:"currentCPUUtilization"`
+}
+
+// CPUUtilization structure
+type CPUUtilization struct {
+	Index       int    `json:"index"`
+	Utilization string `json:"utilization"`
+}
+
+func getProcessorDataController(w http.ResponseWriter, r *http.Request) {
+	processorInfo := getProcessorData()
+	json.NewEncoder(w).Encode(processorInfo)
+}
+
+func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
+	processorInfo := getProcessorData()
+
+	postBody := preparePostBody(processorInfo)
+
+	requestBody, err := json.Marshal(postBody)
+	dealwithErr(err)
+
+	body := postRequest("/processors", requestBody)
+
+	fmt.Println(string(body))
 }
 
 func getProcessorData() ProcessorInfo {
@@ -138,6 +137,20 @@ func getRunningProcessesController(w http.ResponseWriter, r *http.Request) {
 	runningProcesses := getRunningProcesses()
 	json.NewEncoder(w).Encode(runningProcesses)
 }
+
+func postRunningProcessesController(w http.ResponseWriter, r *http.Request) {
+	runningProcesses := getRunningProcesses()
+
+	postBody := preparePostBody(runningProcesses)
+
+	requestBody, err := json.Marshal(postBody)
+	dealwithErr(err)
+
+	body := postRequest("/runningProcesses", requestBody)
+
+	fmt.Println(string(body))
+}
+
 func getRunningProcesses() RunningProccessesInfo {
 	infoStat, err := host.Info()
 	dealwithErr(err)
@@ -163,6 +176,10 @@ func getRunningProcesses() RunningProccessesInfo {
 	return runningProcesses
 }
 
+type UsersLog struct {
+	Users []UserInfo `json:"activeUsers"`
+}
+
 // UserInfo structure
 type UserInfo struct {
 	Username    string `json:"username"`
@@ -176,7 +193,20 @@ func getCurrentUsersController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func getCurrentUsers() []UserInfo {
+func postCurrentUsersController(w http.ResponseWriter, r *http.Request) {
+	users := getCurrentUsers()
+
+	postBody := preparePostBody(users)
+
+	requestBody, err := json.Marshal(postBody)
+	dealwithErr(err)
+
+	body := postRequest("/users", requestBody)
+
+	fmt.Println(string(body))
+}
+
+func getCurrentUsers() UsersLog {
 	out, err := exec.Command("who").Output()
 	dealwithErr(err)
 
@@ -200,23 +230,36 @@ func getCurrentUsers() []UserInfo {
 		}
 		users = append(users, user)
 	}
-	return users
+	return UsersLog{Users: users}
 }
 
 // OSInfo structure
 type OSInfo struct {
-	Runtime  string
-	Name     string
-	Platform string
+	Runtime  string `json:"runtime"`
+	Name     string `json:"name"`
+	Platform string `json:"platform"`
 }
 
-func getSODataController(w http.ResponseWriter, r *http.Request) {
+func getOSDataController(w http.ResponseWriter, r *http.Request) {
 
-	osInfo := getSOData()
+	osInfo := getOSData()
 	json.NewEncoder(w).Encode(osInfo)
 }
 
-func getSOData() OSInfo {
+func postOSDataController(w http.ResponseWriter, r *http.Request) {
+	osInfo := getOSData()
+
+	postBody := preparePostBody(osInfo)
+
+	requestBody, err := json.Marshal(postBody)
+	dealwithErr(err)
+
+	body := postRequest("/os", requestBody)
+
+	fmt.Println(string(body))
+}
+
+func getOSData() OSInfo {
 	hostStat, err := host.Info()
 	dealwithErr(err)
 
@@ -244,13 +287,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	msg = msg + "* Información de procesador: /processor\n"
 	msg = msg + "* Información de procesos: /runningProcesses\n"
 	msg = msg + "* Información de procesos: /users\n"
-	msg = msg + "* Información de SO: /so\n"
+	msg = msg + "* Información de SO: /os\n"
 	msg = msg + "\n"
 	msg = msg + "Envíos al API disponibles:\n"
 	msg = msg + "* Información de procesador: /log/processor\n"
 	msg = msg + "* Información de procesos: /log/runningProcesses\n"
 	msg = msg + "* Información de procesos: /log/users\n"
-	msg = msg + "* Información de SO: /log/so\n"
+	msg = msg + "* Información de SO: /log/os\n"
 	w.Write([]byte(msg))
 }
 
@@ -261,12 +304,13 @@ func main() {
 	mux.HandleFunc("/processor", getProcessorDataController)
 	mux.HandleFunc("/runningProcesses", getRunningProcessesController)
 	mux.HandleFunc("/users", getCurrentUsersController)
-	mux.HandleFunc("/so", getSODataController)
+	mux.HandleFunc("/os", getOSDataController)
 
 	mux.HandleFunc("/log/processor", postProcessorDataController)
-	//mux.HandleFunc("/log/runningProcesses", postRunningProcessesController)
-	//mux.HandleFunc("/log/users", postCurrentUsersController)
-	//mux.HandleFunc("/log/so", postSODataController)
+	mux.HandleFunc("/log/runningProcesses", postRunningProcessesController)
+	mux.HandleFunc("/log/users", postCurrentUsersController)
+	mux.HandleFunc("/log/os", postOSDataController)
+
 	hostInfo := getHostInfo()
 	fmt.Println("Agent Hostname:" + hostInfo.Hostname)
 	fmt.Println("Agent UID:" + agentUID)
