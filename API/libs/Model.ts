@@ -10,7 +10,7 @@ export default class Model {
     
     constructor() { }
     
-    insert(query: string) {
+    execQuery(query: string) {
         let result = new Promise((resolve, reject) => {
             Model.dbc.query(query, (err: any, rows: any, fields: any) => {
                 if (err) { reject(err); }

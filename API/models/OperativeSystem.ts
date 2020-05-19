@@ -27,8 +27,8 @@ export default class OperativeSystem extends Model {
             if (this.agentUID === undefined) { throw "No Agent UID assigned"; }
             const query = `INSERT INTO servers.OSLogs (agentId, runtime, name, platform)
             VALUES ('${this.agentUID}', '${this.runtime}', '${this.name}', '${this.platform}');`;
-            console.log(query);
-            return super.insert(query);
+            //console.log(query);
+            return super.execQuery(query);
         } catch (err) {
             return err;
         }

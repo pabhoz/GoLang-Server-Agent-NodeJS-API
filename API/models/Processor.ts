@@ -44,7 +44,7 @@ export default class Processor extends Model {
             if (this.agentUID === undefined) { throw "No Agent UID assigned"; }
             const query = `INSERT INTO servers.ProcessorLogs (agentId, cpuIndex, vendorId, family, numberOfCores, modelName, speed, currentCPUUtilization)
             VALUES ('${this.agentUID}', ${this.cpuIndex}, '${this.vendorId}', '${this.family}', ${this.numberOfCores}, '${this.modelName}', '${this.speed}', '${JSON.stringify(this.currentCPUUtilization)}');`;
-            return super.insert(query);
+            return super.execQuery(query);
         } catch (err) {
             return err;
         }

@@ -32,7 +32,7 @@ export default class RunningProcesses extends Model {
             if (this.agentUID === undefined) { throw "No Agent UID assigned"; }
             const query = `INSERT INTO servers.RunningProcessesLog (agentId, total, running, processesList)
             VALUES ('${this.agentUID}', '${this.total}', '${this.running}', '${JSON.stringify(this.processesList)}');`;
-            return super.insert(query);
+            return super.execQuery(query);
         } catch (err) {
             return err;
         }

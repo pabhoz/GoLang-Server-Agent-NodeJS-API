@@ -21,7 +21,7 @@ export default class Users extends Model {
             if (this.agentUID === undefined) { throw "No Agent UID assigned"; }
             const query = `INSERT INTO servers.UsersLogs (agentId, activeUsers)
             VALUES ('${this.agentUID}', '${JSON.stringify(this.activeUsers)}');`;
-            return super.insert(query);
+            return super.execQuery(query);
         } catch (err) {
             return err;
         }

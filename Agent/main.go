@@ -96,6 +96,7 @@ func postProcessorDataController(w http.ResponseWriter, r *http.Request) {
 	body := postRequest("/processors", requestBody)
 
 	fmt.Println(string(body))
+	w.Write(body)
 }
 
 func getProcessorData() ProcessorInfo {
@@ -149,6 +150,7 @@ func postRunningProcessesController(w http.ResponseWriter, r *http.Request) {
 	body := postRequest("/runningProcesses", requestBody)
 
 	fmt.Println(string(body))
+	w.Write(body)
 }
 
 func getRunningProcesses() RunningProccessesInfo {
@@ -176,6 +178,7 @@ func getRunningProcesses() RunningProccessesInfo {
 	return runningProcesses
 }
 
+// UsersLog structure
 type UsersLog struct {
 	Users []UserInfo `json:"activeUsers"`
 }
@@ -204,6 +207,7 @@ func postCurrentUsersController(w http.ResponseWriter, r *http.Request) {
 	body := postRequest("/users", requestBody)
 
 	fmt.Println(string(body))
+	w.Write(body)
 }
 
 func getCurrentUsers() UsersLog {
@@ -257,6 +261,7 @@ func postOSDataController(w http.ResponseWriter, r *http.Request) {
 	body := postRequest("/os", requestBody)
 
 	fmt.Println(string(body))
+	w.Write(body)
 }
 
 func getOSData() OSInfo {
@@ -297,9 +302,29 @@ func index(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(msg))
 }
 
+func handshakeAPI() {
+	postBody := PostBody{
+		AgetUID: agentUID,
+	}
+
+	requestBody, err := json.Marshal(postBody)
+	dealwithErr(err)
+
+	resp, err := http.Post(api+"/agents", "application/json", bytes.NewBuffer(requestBody))
+	dealwithErr(err)
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	dealwithErr(err)
+
+	fmt.Println(string(body))
+}
+
 func main() {
 	mux := http.NewServeMux()
 
+	// Set Mux Server Routes
 	mux.HandleFunc("/", index)
 	mux.HandleFunc("/processor", getProcessorDataController)
 	mux.HandleFunc("/runningProcesses", getRunningProcessesController)
@@ -311,10 +336,16 @@ func main() {
 	mux.HandleFunc("/log/users", postCurrentUsersController)
 	mux.HandleFunc("/log/os", postOSDataController)
 
+	// Get host Data for the welcome log
 	hostInfo := getHostInfo()
 	fmt.Println("Agent Hostname:" + hostInfo.Hostname)
 	fmt.Println("Agent UID:" + agentUID)
 	fmt.Println("Listening at: localhost:" + port + "; API: " + api)
+
+	// Call API for Agent register if not yet registered
+	handshakeAPI()
+
+	// Run Mux HTTP Server
 	http.ListenAndServe(":"+port, mux)
 
 }
