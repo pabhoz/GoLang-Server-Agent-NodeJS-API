@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	ps "github.com/mitchellh/go-ps"
 	"github.com/shirou/gopsutil/cpu"
@@ -52,7 +53,16 @@ func preparePostBody(data interface{}) PostBody {
 }
 
 func postRequest(endpoint string, requestBody []byte) []byte {
-	resp, err := http.Post(api+endpoint, "application/json", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", api+endpoint, bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Agent-Key", "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918")
+	dealwithErr(err)
+
+	client := http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+
+	resp, err := client.Do(req)
 	dealwithErr(err)
 
 	defer resp.Body.Close()
@@ -310,13 +320,7 @@ func handshakeAPI() {
 	requestBody, err := json.Marshal(postBody)
 	dealwithErr(err)
 
-	resp, err := http.Post(api+"/agents", "application/json", bytes.NewBuffer(requestBody))
-	dealwithErr(err)
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	dealwithErr(err)
+	body := postRequest("/agents", requestBody)
 
 	fmt.Println(string(body))
 }
