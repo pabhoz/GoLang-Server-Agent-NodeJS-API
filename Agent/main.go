@@ -199,6 +199,7 @@ type UserInfo struct {
 	Application string `json:"application"`
 	Date        string `json:"date"`
 	Time        string `json:"time"`
+	IP          string `json:"ip"`
 }
 
 func getCurrentUsersController(w http.ResponseWriter, r *http.Request) {
@@ -228,19 +229,21 @@ func getCurrentUsers() UsersLog {
 
 	var users []UserInfo
 
-	for i := 0; i < len(userInfoArray)/5; i++ {
+	for i := 0; i < len(userInfoArray)/6; i++ {
 
-		limit := i * 5
+		limit := i * 6
 		username := strings.Join(userInfoArray[limit:limit+1], "")
 		application := strings.Join(userInfoArray[limit+1:limit+2], "")
 		date := strings.Join(userInfoArray[limit+2:limit+4], "")
 		time := strings.Join(userInfoArray[limit+4:limit+5], "")
+		ip := strings.Join(userInfoArray[limit+5:limit+6], "")
 
 		user := UserInfo{
 			Username:    username,
 			Application: application,
 			Date:        date,
 			Time:        time,
+			IP:          ip,
 		}
 		users = append(users, user)
 	}
